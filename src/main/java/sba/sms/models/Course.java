@@ -5,15 +5,17 @@ import jakarta.persistence.*;
 import java.util.List;
 import java.util.Objects;
 
-@Table(name = "course")
+@Table(name = "Course")
+@Entity
 public class Course {
     @Id
+    @GeneratedValue
     private int id;
     @Column(name="name", length=50, nullable = false)
     private String name;
     @Column(name="instructor", length=50, nullable = false)
     private String instructor;
-@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "courses")
+@ManyToMany(fetch = FetchType.EAGER, mappedBy = "courses")
     private List<Student> students;
 
     public Course() {

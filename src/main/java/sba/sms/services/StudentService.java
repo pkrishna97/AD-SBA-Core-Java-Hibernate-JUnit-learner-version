@@ -3,48 +3,45 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import sba.sms.dao.StudentI;
 import sba.sms.models.Course;
+import sba.sms.models.Student;
 import sba.sms.utils.HibernateUtil;
 
 import java.util.List;
 
 public class StudentService implements StudentI {
 
-    @Override
-    public List<sba.sms.models.Student> getAllStudents() {
-        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
-        Session session = sessionFactory.openSession();
-        try {
-            List<sba.sms.models.Student> list = session.createQuery("from student", sba.sms.models.Student.class).getResultList();
-            return list;
-        } catch (HibernateException ex) {
+    CourseService courseService = new CourseService();
 
+    @Override
+    public List<Student> getAllStudents() {
+        List<Student> result = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            Query<Student> q = session.createQuery("from  Student", Student.class);
+
+            result = q.getResultList();
+        } catch (HibernateException ex) {
             ex.printStackTrace();
+
         } finally {
             session.close();
-
         }
-        return null;
-
+        return result;
     }
 
     @Override
-    public void createStudent(sba.sms.models.Student student) {
+    public void createStudent(Student student) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Transaction tx = null;
         Session session = sessionFactory.openSession();
         try {
             tx = session.beginTransaction();
-            // transient mode
-
-            // persist mode
-            session.persist(student);
-
-
+            session.merge(student);
             tx.commit();
         } catch (HibernateException ex) {
-
             ex.printStackTrace();
             tx.rollback();
         } finally {
@@ -55,14 +52,13 @@ public class StudentService implements StudentI {
     }
 
     @Override
-    public sba.sms.models.Student getStudentByEmail(String email) {
+    public Student getStudentByEmail(String email) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
         try {
-            List<sba.sms.models.Student> list = session.createQuery("from student where email="+email, sba.sms.models.Student.class).getResultList();
+            List<Student> list = session.createQuery("from sbajpa.student where email="+email, Student.class).getResultList();
             return list.get(0);
         } catch (HibernateException ex) {
-
             ex.printStackTrace();
         } finally {
             session.close();
@@ -76,8 +72,8 @@ public class StudentService implements StudentI {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
         try {
-            List<sba.sms.models.Student> list = session.createQuery("from student where email="+email, sba.sms.models.Student.class).getResultList();
-            sba.sms.models.Student student= list.get(0);
+            List<Student> list = session.createQuery("from sbajpa.student where email="+email, Student.class).getResultList();
+            Student student= list.get(0);
             if(student.getPassword().equals(password))
                 return true;
         } catch (HibernateException ex) {
@@ -92,14 +88,18 @@ public class StudentService implements StudentI {
 
     @Override
     public void registerStudentToCourse(String email, int courseId) {
+        Student student = getStudentByEmail(email);
+        Course course = courseService.getCourseById(courseId);
 
-
+        if(!student.getCourses().contains(course)){
+            student.getCourses().add(course);
+        }
     }
 
     @Override
     public List<Course> getStudentCourses(String email) {
-
-        return null;
+        Student student = getStudentByEmail(email);
+        return student.getCourses();
     }
 
 }

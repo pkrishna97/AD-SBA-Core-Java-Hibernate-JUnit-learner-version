@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 import java.util.List;
 import java.util.Objects;
 
-@Table (name= "student")
+@Table (name= "Student")
+@Entity
 public class Student {
     // email
     // name
@@ -18,13 +19,11 @@ public class Student {
     private String name;
     @Column(name = "password", length = 50, nullable = false)
     private String password;
-    @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "student_courses",
-            joinColumns = { @JoinColumn(name = "student_email") },
-            inverseJoinColumns = { @JoinColumn(name = "courses_id")}
-    )
-
+    @ManyToMany(cascade = {CascadeType.PERSIST,CascadeType.MERGE,CascadeType.REFRESH,CascadeType.REMOVE,CascadeType.DETACH},
+            fetch = FetchType.EAGER)
+    @JoinTable(name = "student_courses",
+            joinColumns = @JoinColumn(name="student_email"),
+            inverseJoinColumns = @JoinColumn(name="course_id"))
     private List<Course> courses;
 
     public Student() {
@@ -85,15 +84,21 @@ public class Student {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Student)) return false;
-        Student student = (Student) o;
-        return getEmail().equals(student.getEmail()) && getName().equals(student.getName()) && getPassword().equals(student.getPassword()) && Objects.equals(getCourses(), student.getCourses());
+    public int hashCode() {
+        return Objects.hash(email, name, password);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(getEmail(), getName(), getPassword(), getCourses());
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Student other = (Student) obj;
+        return  Objects.equals(email, other.email)
+                && Objects.equals(name, other.name) && Objects.equals(password, other.password);
     }
+
 }

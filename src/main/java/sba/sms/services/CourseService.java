@@ -1,26 +1,68 @@
 package sba.sms.services;
 
-
-import sba.sms.dao.CourseI;
-import sba.sms.models.Course;
-
 import java.util.List;
 
-public class CourseService implements CourseI {
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
+import sba.sms.models.Course;
+import sba.sms.models.Student;
+import sba.sms.utils.HibernateUtil;
 
-    @Override
+public class CourseService {
+
     public void createCourse(Course course) {
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+
+            tx = session.beginTransaction();
+            session.merge(course);
+            tx.commit();
+
+        } catch (HibernateException ex) {
+            ex.printStackTrace();
+            tx.rollback();
+        } finally {
+            session.close();
+        }
 
     }
 
-    @Override
     public Course getCourseById(int courseId) {
-        return null;
+        Course c = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            Query<Course> q = session.createQuery("from  sbajpa.course c where c.Id = :courseId", Course.class)
+                    .setParameter("courseId", courseId);
+            c = q.getSingleResult();
+
+        } catch (HibernateException ex) {
+            ex.printStackTrace();
+
+        } finally {
+            session.close();
+        }
+
+        return c;
     }
 
-    @Override
     public List<Course> getAllCourses() {
-        return null;
+        List<Course> result = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            Query<Course> q = session.createQuery("from  sbajpa.course", Course.class);
+
+            result = q.getResultList();
+        } catch (HibernateException ex) {
+            ex.printStackTrace();
+
+        } finally {
+            session.close();
+        }
+        return result;
     }
+
 }
