@@ -15,7 +15,8 @@ public class Course {
     private String name;
     @Column(name="instructor", length=50, nullable = false)
     private String instructor;
-@ManyToMany(fetch = FetchType.EAGER, mappedBy = "courses")
+    @ManyToMany(mappedBy = "courses",
+            cascade = {CascadeType.PERSIST,CascadeType.MERGE,CascadeType.DETACH,CascadeType.REFRESH})
     private List<Student> students;
 
     public Course() {

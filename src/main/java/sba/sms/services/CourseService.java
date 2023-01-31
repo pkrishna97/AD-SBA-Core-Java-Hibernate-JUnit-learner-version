@@ -35,7 +35,7 @@ public class CourseService {
         Course c = null;
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            Query<Course> q = session.createQuery("from  sbajpa.course c where c.Id = :courseId", Course.class)
+            Query<Course> q = session.createQuery("from  Course c where c.Id = :courseId", Course.class)
                     .setParameter("courseId", courseId);
             c = q.getSingleResult();
 
@@ -53,7 +53,7 @@ public class CourseService {
         List<Course> result = null;
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            Query<Course> q = session.createQuery("from  sbajpa.course", Course.class);
+            Query<Course> q = session.createQuery("FROM  Course", Course.class);
 
             result = q.getResultList();
         } catch (HibernateException ex) {

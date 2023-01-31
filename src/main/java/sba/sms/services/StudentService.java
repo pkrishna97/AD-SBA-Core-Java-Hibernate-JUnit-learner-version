@@ -1,4 +1,5 @@
 package sba.sms.services;
+import jakarta.persistence.TypedQuery;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -56,8 +57,10 @@ public class StudentService implements StudentI {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
         try {
-            List<Student> list = session.createQuery("from sbajpa.student where email="+email, Student.class).getResultList();
-            return list.get(0);
+            TypedQuery<Student> query = session.createQuery("FROM Student WHERE email = :email", Student.class);
+            query.setParameter("email", email);
+            Student student=query.getSingleResult();
+            return student;
         } catch (HibernateException ex) {
             ex.printStackTrace();
         } finally {
@@ -72,8 +75,9 @@ public class StudentService implements StudentI {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
         try {
-            List<Student> list = session.createQuery("from sbajpa.student where email="+email, Student.class).getResultList();
-            Student student= list.get(0);
+            TypedQuery<Student> query = session.createQuery("FROM Student WHERE email = :email", Student.class);
+            query.setParameter("email", email);
+            Student student=query.getSingleResult();
             if(student.getPassword().equals(password))
                 return true;
         } catch (HibernateException ex) {
